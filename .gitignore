@@ -1,0 +1,7 @@
+# Ignore pycache files because they always change
+backend/__pycache__/
+backend/softeng/__pycache__/
+backend/softeng/migrations/__pycache__
+
+*.swp 
+db.sqlite3
