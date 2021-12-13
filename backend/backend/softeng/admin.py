@@ -10,11 +10,13 @@ class ChargeAdmin(admin.ModelAdmin):
         'dateOfCharge', 'amount', 'vehicleID')
 
 class OperatorAdmin(admin.ModelAdmin):
-    list_display = ('operatorID', 'username', 'password', 'status')
+    list_display = ('operatorID', 'username', 'password', 'status', 'abriviation')
 
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ('invoiceID', 'operatorID', 'amount', 'startingDate', 'column')
 
+class VehicleAdmin(admin.ModelAdmin):
+    list_display = ('vehicleID', 'tagID', 'tagProvider', 'licenseYear')
 
 # Register your models here.
 
