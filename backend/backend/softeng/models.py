@@ -68,3 +68,6 @@ class Vehicle(models.Model):
     tagID = models.TextField(max_length=9)
     tagProvider = models.ForeignKey(Operator, on_delete=CASCADE)
     licenseYear = models.DecimalField(max_digits=4, decimal_places=0)
+     
+    def __repr__(self):
+        return self.vehicleID

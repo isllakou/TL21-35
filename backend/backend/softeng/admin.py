@@ -23,4 +23,4 @@ class VehicleAdmin(admin.ModelAdmin):
 admin.site.register(Charge, ChargeAdmin)
 admin.site.register(Operator, OperatorAdmin)
 admin.site.register(Invoice, InvoiceAdmin)
-
+admin.site.register(Vehicle, VehicleAdmin)
