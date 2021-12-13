@@ -3,5 +3,6 @@ backend/__pycache__/
 backend/softeng/__pycache__/
 backend/softeng/migrations/__pycache__
 
+*.pyc
 *.swp 
 db.sqlite3
