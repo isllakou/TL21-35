@@ -16,7 +16,7 @@ class Charge(models.Model):
         primary_key=True,
         unique=True, 
         max_digits=18, decimal_places=0)
-    operatorID = models.ForeignKey(
+    foperator = models.ForeignKey(
         Operator,
         on_delete = models.CASCADE
     )
@@ -38,7 +38,7 @@ class Invoice(models.Model):
         max_digits = 18,
         decimal_places =0
     )
-    operatorID = models.ForeignKey(
+    foperator = models.ForeignKey(
         Operator,
         on_delete = models.CASCADE
     )

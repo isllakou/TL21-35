@@ -6,14 +6,14 @@ from .models import *
 
 
 class ChargeAdmin(admin.ModelAdmin):
-    list_display = ('tagID', 'operatorDebited', 
+    list_display = ('tagID', 'foperator', 'operatorDebited', 
         'dateOfCharge', 'amount', 'vehicleID')
 
 class OperatorAdmin(admin.ModelAdmin):
     list_display = ('operatorID', 'username', 'password', 'status')
 
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('invoiceID', 'operatorID', 'amount', 'startingDate', 'column')
+    list_display = ('invoiceID', 'foperator', 'amount', 'startingDate', 'column')
 
 
 # Register your models here.
