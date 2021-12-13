@@ -1,13 +1,19 @@
 from django.db import models
+from django.db.models.deletion import CASCADE
 
 # Create your models here.
 
 class Operator(models.Model):
-    operatorID = models.DecimalField(primary_key=True, unique=True, max_digits=10, decimal_places=0)
+    """
+    Make a abriviation and username choice list. FOr username maybe
+    """
+    operatorID = models.DecimalField(
+        primary_key=True, unique=True, max_digits=10, decimal_places=0)
     username = models.CharField(unique=True, max_length=30)
     password = models.DecimalField(unique=True, max_digits=10, decimal_places = 0)
     status = models.BooleanField(default=False)
-
+    abriviation = models.TextField(null=True)
+    
     def __repr__(self):
         return self.operatorID
 
@@ -57,3 +63,8 @@ class Invoice(models.Model):
     def __repr__(self):
         return self.invoiceID
 
+class Vehicle(models.Model):
+    vehicleID = models.TextField(primary_key=True)
+    tagID = models.TextField(max_length=9)
+    tagProvider = models.ForeignKey(Operator, on_delete=CASCADE)
+    licenseYear = models.DecimalField(max_digits=4, decimal_places=0)
