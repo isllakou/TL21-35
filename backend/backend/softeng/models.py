@@ -13,14 +13,14 @@ class Operator(models.Model):
     password = models.DecimalField(unique=True, max_digits=10, decimal_places = 0)
     status = models.BooleanField(default=False)
     abriviation = models.TextField(null=True)
-    
+
     def __repr__(self):
         return self.operatorID
 
 class Charge(models.Model):
     tagID = models.DecimalField(
         primary_key=True,
-        unique=True, 
+        unique=True,
         max_digits=18, decimal_places=0)
     foperator = models.ForeignKey(
         Operator,
@@ -68,6 +68,15 @@ class Vehicle(models.Model):
     tagID = models.TextField(max_length=9)
     tagProvider = models.ForeignKey(Operator, on_delete=CASCADE)
     licenseYear = models.DecimalField(max_digits=4, decimal_places=0)
-     
+
     def __repr__(self):
         return self.vehicleID
+
+
+class Station(models.Model):
+    stationID = models.CharField(primary_key=True, max_length=5)
+    stationProvider = models.CharField(max_length=30)
+    stationName = models.CharField(max_length=30)
+
+    def __repr__(self):
+        return self.stationID
