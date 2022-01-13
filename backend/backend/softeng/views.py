@@ -31,7 +31,8 @@ new = [
 
 def resetstations(request):
     if request.method == 'POST':
-        df=pd.read_csv('sampledata01_stations.csv',sep=';')
+        #Change path
+        df=pd.read_csv('/home/ioanna/Documents/TL21-35/backend/backend/sampledata01/sampledata01/sampledata01_stations.csv',sep=';')
         #print(df)
         Station.objects.all().delete()
         row_iter = df.iterrows()
