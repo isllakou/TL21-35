@@ -119,6 +119,42 @@ def resetstations(request):
         response = JsonResponse({"status":"failed"}, safe=False)
         return response
 
+def resetpasses(request):
+    if request.method == 'POST':
+        #Change path
+        df=pd.read_csv('/home/ioanna/Documents/TL21-35/backend/backend/sampledata01/sampledata01/sampledata01_passes100_8000.csv',sep=';')
+        #print(df)
+        Passes.objects.all().delete()
+        row_iter = df.iterrows()
+
+        objs = [
+
+            Passes(
+
+                 passID = row['passID'],
+                 timestamp = row['timestamp'],
+                 stationRef = row['stationRef'],
+                 vehicleRef = row['vehicleRef'],
+                 charge = row['charge']
+
+
+            )
+
+            for index, row in row_iter
+
+        ]
+
+        if(objs):
+            if(Passes.objects.bulk_create(objs)):
+                response = JsonResponse({"status":"OK"}, safe=False)
+            else:
+             response = JsonResponse({"status":"failed"}, safe=False)
+
+        return response
+    else:
+        response = JsonResponse({"status":"failed"}, safe=False)
+        return response
+
 
 def healthcheck(request):
     return HttpResponse("hi")

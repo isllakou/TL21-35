@@ -19,6 +19,17 @@ class Operator(models.Model):
     def __repr__(self):
         return self.provider_ID
 
+class Passes(models.Model):
+    passID = models.TextField(primary_key=True, unique = True, max_length=10)
+    timestamp = models.TextField(max_length=16)
+    stationRef = models.TextField(max_length=4)
+    vehicleRef = models.TextField(max_length=12)
+    charge = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __repr__(self):
+        return self.passID
+    
+
 # class Charge(models.Model):
 #     tagID = models.DecimalField(
 #         primary_key=True,

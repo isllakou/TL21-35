@@ -13,6 +13,10 @@ class OperatorAdmin(admin.ModelAdmin):
     # list_display = ('operatorID', 'username', 'password', 'status', 'abriviation')
     list_display = ('provider_ID', 'tagProvider')
 
+class PassesAdmin(admin.ModelAdmin):
+    list_display = ( 'passID', 'timestamp', 'stationRef', 'vehicleRef', 'charge')
+
+
 # class InvoiceAdmin(admin.ModelAdmin):
 #     list_display = ('invoiceID', 'foperator', 'amount', 'startingDate', 'column')
 
@@ -26,6 +30,7 @@ class StationAdmin(admin.ModelAdmin):
 
 #admin.site.register(Charge, ChargeAdmin)
 admin.site.register(Operator, OperatorAdmin)
+admin.site.register(Passes, PassesAdmin)
 #admin.site.register(Invoice, InvoiceAdmin)
 admin.site.register(Vehicle, VehicleAdmin)
 admin.site.register(Station, StationAdmin)
