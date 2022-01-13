@@ -5,15 +5,16 @@ gia na mhn ta eisagoyme ena ena"""
 from .models import *
 
 
-class ChargeAdmin(admin.ModelAdmin):
-    list_display = ('tagID', 'foperator', 'operatorDebited',
-        'dateOfCharge', 'amount', 'vehicleID')
+# class ChargeAdmin(admin.ModelAdmin):
+#     list_display = ('tagID', 'foperator', 'operatorDebited',
+#         'dateOfCharge', 'amount', 'vehicleID')
 
 class OperatorAdmin(admin.ModelAdmin):
-    list_display = ('operatorID', 'username', 'password', 'status', 'abriviation')
+    # list_display = ('operatorID', 'username', 'password', 'status', 'abriviation')
+    list_display = ('provider_ID', 'tagProvider')
 
-class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('invoiceID', 'foperator', 'amount', 'startingDate', 'column')
+# class InvoiceAdmin(admin.ModelAdmin):
+#     list_display = ('invoiceID', 'foperator', 'amount', 'startingDate', 'column')
 
 class VehicleAdmin(admin.ModelAdmin):
     list_display = ('vehicleID', 'tagID', 'tagProvider', 'licenseYear')
@@ -23,8 +24,8 @@ class StationAdmin(admin.ModelAdmin):
 
 # Register your models here.
 
-admin.site.register(Charge, ChargeAdmin)
+#admin.site.register(Charge, ChargeAdmin)
 admin.site.register(Operator, OperatorAdmin)
-admin.site.register(Invoice, InvoiceAdmin)
+#admin.site.register(Invoice, InvoiceAdmin)
 admin.site.register(Vehicle, VehicleAdmin)
 admin.site.register(Station, StationAdmin)
