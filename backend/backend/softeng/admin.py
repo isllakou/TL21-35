@@ -21,7 +21,7 @@ class PassesAdmin(admin.ModelAdmin):
 #     list_display = ('invoiceID', 'foperator', 'amount', 'startingDate', 'column')
 
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ('vehicleID', 'tagID', 'tagProvider', 'licenseYear')
+    list_display = ('vehicleID', 'tagID', 'tagProvider', 'providerAbbr', 'licenseYear')
 
 class StationAdmin(admin.ModelAdmin):
     list_display = ('stationID', 'stationProvider', 'stationName')

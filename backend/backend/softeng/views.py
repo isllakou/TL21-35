@@ -37,22 +37,6 @@ def resetvehicles(request):
         Vehicle.objects.all().delete()
         row_iter = df.iterrows()
 
-
-        # #create operators
-        # ops = [
-        #     Operator(
-        #         provider_ID = row['providerAbbr'],
-
-        #         tagProvider = row['tagProvider']
-        #     )
-
-        #     for index, row in row_iter
-        # ]
-
-        # tagPro = Operator.objects.get_or_create(ops)
-
-        # print("Tag pro is:", tagPro)
-
         objs = [
 
             Vehicle(
@@ -60,11 +44,11 @@ def resetvehicles(request):
                 vehicleID = row['vehicleID'],
                 tagID = row['tagID'],
             
-                #tagProvider = Operator.objects.get_or_create( [ Operator( provider_ID = row['providerAbbr'], tagProvider = row['tagProvider']) ]) 
+               
                 tagProvider= (Operator.objects.get_or_create( provider_ID = row['providerAbbr'], tagProvider = row['tagProvider'])[0])
-                #tagProvider = tagPro
+               
                 ,
-                
+                providerAbbr = row['providerAbbr'],
                 licenseYear = row['licenseYear']
 
             )
@@ -133,7 +117,7 @@ def resetpasses(request):
 
                  passID = row['passID'],
                  timestamp = get_timestamp(row['timestamp']),
-                 stationRef = row['stationRef'],
+                 stationRef = (Station.objects.get_or_create( stationID = row['stationRef'])[0]),
                  vehicleRef = row['vehicleRef'],
                  charge = row['charge']
 

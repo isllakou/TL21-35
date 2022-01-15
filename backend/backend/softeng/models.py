@@ -19,15 +19,7 @@ class Operator(models.Model):
     def __repr__(self):
         return self.provider_ID
 
-class Passes(models.Model):
-    passID = models.TextField(primary_key=True, unique = True, max_length=10)
-    timestamp = models.DateTimeField(auto_now=False)
-    stationRef = models.TextField(max_length=4)
-    vehicleRef = models.TextField(max_length=12)
-    charge = models.DecimalField(max_digits=10, decimal_places=2)
 
-    def __repr__(self):
-        return self.passID
     
 
 # class Charge(models.Model):
@@ -80,6 +72,7 @@ class Vehicle(models.Model):
     vehicleID = models.TextField(primary_key=True)
     tagID = models.TextField(max_length=9)
     tagProvider = models.ForeignKey(Operator, on_delete=CASCADE)
+    providerAbbr = models.TextField(max_length=20)
     licenseYear = models.DecimalField(max_digits=4, decimal_places=0)
 
     def __repr__(self):
@@ -93,3 +86,14 @@ class Station(models.Model):
 
     def __repr__(self):
         return self.stationID
+
+class Passes(models.Model):
+    passID = models.TextField(primary_key=True, unique = True, max_length=10)
+    timestamp = models.DateTimeField(auto_now=False)
+    #stationRef = models.TextField(max_length=4)
+    stationRef = models.ForeignKey(Station, on_delete= CASCADE)
+    vehicleRef = models.TextField(max_length=12)
+    charge = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __repr__(self):
+        return self.passID
