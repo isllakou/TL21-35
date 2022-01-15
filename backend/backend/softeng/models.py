@@ -21,7 +21,7 @@ class Operator(models.Model):
 
 class Passes(models.Model):
     passID = models.TextField(primary_key=True, unique = True, max_length=10)
-    timestamp = models.TextField(max_length=16)
+    timestamp = models.DateTimeField(auto_now=False)
     stationRef = models.TextField(max_length=4)
     vehicleRef = models.TextField(max_length=12)
     charge = models.DecimalField(max_digits=10, decimal_places=2)

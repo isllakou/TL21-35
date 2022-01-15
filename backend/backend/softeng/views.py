@@ -7,18 +7,18 @@ from django.core import serializers
 import json
 import pandas as pd
 from .models import *
-new = [
- {
-   "stationID": "AO00",
-   "stationProvider": "aodos",
-   "stationName": "aodos tolls station 00"
- },
- {
-   "stationID": "AO01",
-   "stationProvider": "aodos",
-   "stationName": "aodos tolls station 01"
- }
- ]
+from datetime import datetime
+
+#ex : timestamp = 1/1/2019 01:33
+def get_timestamp(timestamp):
+    date_time = timestamp.split(" ")
+    
+    date = date_time[0].split("/")
+    time = date_time[1].split(":")
+
+    timestamp_field = datetime(int(date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]), 0, 0)
+    return timestamp_field
+
 
 # def resetstations(request):
 #     if request.method == 'POST':
@@ -132,7 +132,7 @@ def resetpasses(request):
             Passes(
 
                  passID = row['passID'],
-                 timestamp = row['timestamp'],
+                 timestamp = get_timestamp(row['timestamp']),
                  stationRef = row['stationRef'],
                  vehicleRef = row['vehicleRef'],
                  charge = row['charge']
