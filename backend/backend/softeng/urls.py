@@ -1,5 +1,5 @@
 from django.urls import path, include, re_path
-from django.conf.urls import url
+# from django.conf.urls import url
 from . import views
 from . import char_endpoints_views
 
@@ -26,7 +26,7 @@ urlpatterns = [
     # ]))
 
     #this works!
-    path('admin/PassesPerStation/<str:station_id>/<str:date_from>/<str:date_to>', char_endpoints_views.PassesPerStation),
+    path('PassesPerStation/<str:station_id>/<str:date_from>/<str:date_to>', char_endpoints_views.PassesPerStation),
 
 
 
