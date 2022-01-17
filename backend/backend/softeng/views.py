@@ -7,32 +7,60 @@ import sampledata01
 import json
 import pandas as pd
 from .models import *
-# new = [
-#  {
-#    "stationID": "AO00",
-#    "stationProvider": "aodos",
-#    "stationName": "aodos tolls station 00"
-#  },
-#  {
-#    "stationID": "AO01",
-#    "stationProvider": "aodos",
-#    "stationName": "aodos tolls station 01"
-#  }
-#  ]
+from datetime import datetime
 
-# def resetstations(request):
-#     if request.method == 'POST':
-#         source = request.read()
-#         # data = json.loads(source)
-#         # ndata = json.dumps(data)
-#         return HttpResponse(source.content)
-#     else:
-#         return HttpResponse("Nop")
+#ex : timestamp = 1/1/2019 01:33
+def get_timestamp(timestamp):
+    date_time = timestamp.split(" ")
+
+    date = date_time[0].split("/")
+    time = date_time[1].split(":")
+
+    timestamp_field = datetime(int(date[2]), int(date[1]), int(date[0]), int(time[0]), int(time[1]), 0, 0)
+    return timestamp_field
+
+def resetvehicles(request):
+    if request.method == 'POST':
+        #Change path
+        df=pd.read_csv('sampledata01/sampledata01_vehicles_100.csv',sep=';')
+        #print(df)
+        Vehicle.objects.all().delete()
+        row_iter = df.iterrows()
+
+        objs = [
+
+            Vehicle(
+
+                vehicleID = row['vehicleID'],
+                tagID = row['tagID'],
+
+
+                tagProvider= (Operator.objects.get_or_create( provider_ID = row['providerAbbr'], tagProvider = row['tagProvider'])[0])
+
+                ,
+                providerAbbr = row['providerAbbr'],
+                licenseYear = row['licenseYear']
+
+            )
+
+            for index, row in row_iter
+
+        ]
+
+        if(objs):
+            if(Vehicle.objects.bulk_create(objs)):
+                response = JsonResponse({"status":"OK"}, safe=False)
+            else:
+             response = JsonResponse({"status":"failed"}, safe=False)
+
+        return response
+    else:
+        response = JsonResponse({"status":"failed"}, safe=False)
+        return response
 
 def resetstations(request):
     if request.method == 'POST':
         df=pd.read_csv('sampledata01/sampledata01_stations.csv',sep=';')
-        #print(df)
         Station.objects.all().delete()
         row_iter = df.iterrows()
 
@@ -63,6 +91,41 @@ def resetstations(request):
         response = JsonResponse({"status":"failed"}, safe=False)
         return response
 
+def resetpasses(request):
+    if request.method == 'POST':
+        #Change path
+        df=pd.read_csv('sampledata01/sampledata01_passes100_8000.csv',sep=';')
+        #print(df)
+        Passes.objects.all().delete()
+        row_iter = df.iterrows()
+
+        objs = [
+
+            Passes(
+
+                 passID = row['passID'],
+                 timestamp = get_timestamp(row['timestamp']),
+                 stationRef = (Station.objects.get_or_create( stationID = row['stationRef'])[0]),
+                 vehicleRef = row['vehicleRef'],
+                 charge = row['charge']
+
+
+            )
+
+            for index, row in row_iter
+
+        ]
+
+        if(objs):
+            if(Passes.objects.bulk_create(objs)):
+                response = JsonResponse({"status":"OK"}, safe=False)
+            else:
+             response = JsonResponse({"status":"failed"}, safe=False)
+
+        return response
+    else:
+        response = JsonResponse({"status":"failed"}, safe=False)
+        return response
 
 def healthcheck(request):
     return HttpResponse("hi")
