@@ -3,22 +3,22 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django import forms
 from django.core import serializers
-#import csv
+import sampledata01
 import json
 import pandas as pd
 from .models import *
-new = [
- {
-   "stationID": "AO00",
-   "stationProvider": "aodos",
-   "stationName": "aodos tolls station 00"
- },
- {
-   "stationID": "AO01",
-   "stationProvider": "aodos",
-   "stationName": "aodos tolls station 01"
- }
- ]
+# new = [
+#  {
+#    "stationID": "AO00",
+#    "stationProvider": "aodos",
+#    "stationName": "aodos tolls station 00"
+#  },
+#  {
+#    "stationID": "AO01",
+#    "stationProvider": "aodos",
+#    "stationName": "aodos tolls station 01"
+#  }
+#  ]
 
 # def resetstations(request):
 #     if request.method == 'POST':
@@ -31,7 +31,7 @@ new = [
 
 def resetstations(request):
     if request.method == 'POST':
-        df=pd.read_csv('sampledata01_stations.csv',sep=';')
+        df=pd.read_csv('sampledata01/sampledata01_stations.csv',sep=';')
         #print(df)
         Station.objects.all().delete()
         row_iter = df.iterrows()
