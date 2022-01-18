@@ -22,7 +22,7 @@ def get_timestamp(timestamp):
 def resetvehicles(request):
     if request.method == 'POST':
         #Change path
-        df=pd.read_csv('sampledata01/sampledata01_vehicles_100.csv',sep=';')
+        df=pd.read_csv('sampledata01/sampledata01_vehicles_100.csv',sep=',')
         #print(df)
         Vehicle.objects.all().delete()
         row_iter = df.iterrows()
@@ -93,23 +93,18 @@ def resetstations(request):
 
 def resetpasses(request):
     if request.method == 'POST':
-        #Change path
-        df=pd.read_csv('sampledata01/sampledata01_passes100_8000.csv',sep=';')
-        #print(df)
+        df=pd.read_csv('sampledata01/sampledata01_passes100_8000.csv',sep=',')
         Passes.objects.all().delete()
         row_iter = df.iterrows()
-
         objs = [
 
             Passes(
-
                  passID = row['passID'],
                  timestamp = get_timestamp(row['timestamp']),
                  stationRef = (Station.objects.get_or_create( stationID = row['stationRef'])[0]),
                  vehicleRef = row['vehicleRef'],
-                 charge = row['charge']
-
-
+                 charge = row['charge'],
+                 providerAbbr = row['providerAbbr']
             )
 
             for index, row in row_iter
@@ -119,10 +114,15 @@ def resetpasses(request):
         if(objs):
             if(Passes.objects.bulk_create(objs)):
                 response = JsonResponse({"status":"OK"}, safe=False)
-            else:
-             response = JsonResponse({"status":"failed"}, safe=False)
+                return response
 
+            else:
+                response = JsonResponse({"status":"failed"}, safe=False)
+                return response
+
+        response = JsonResponse({"status":"failed"}, safe=False)
         return response
+
     else:
         response = JsonResponse({"status":"failed"}, safe=False)
         return response

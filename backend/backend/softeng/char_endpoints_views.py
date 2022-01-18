@@ -8,36 +8,14 @@ import pandas as pd
 from .models import *
 from datetime import datetime
 
-class general_info:
-    def __init__(self, station, stationOperator, RequestTimestamp, PeriodFrom, PeriodTo,NumberOfPasses):
-        self.Station = station
-        self.StationOperator = stationOperator
-        self.RequestTimestamp = RequestTimestamp
-        self.PeriodFrom = PeriodFrom
-        self.PeriodTo = PeriodTo
-        self.NumberOfPasses = NumberOfPasses
-
 
 #Endpoint 1
 def PassesPerStation(request, station_id, date_from, date_to):
-
-        # try:
-        #     date1 = datetime.strptime(date_from, "%Y%m%d")
-        #     date2 = datetime.strptime(date_to, "%Y%m%d")
-
-        #     passes = Passes.objects.filter(stationRef = station_id, timestamp__gte =date1, timestamp__lte =date2)
-
-        #     response = serializers.serialize("json", passes)
-        #     return HttpResponse(response, content_type='application/json')
-
-        # except BaseException:
-        #     return JsonResponse({"status":"parameters not valid"}, safe=False )
-
             #Get Passes by id and date_from, date_to
             date1 = datetime.strptime(date_from, "%Y%m%d")
             date2 = datetime.strptime(date_to, "%Y%m%d")
 
-            passes = Passes.objects.filter(stationRef = station_id, timestamp__gte =date1, timestamp__lte =date2)
+            passes = Passes.objects.filter(stationRef = station_id, timestamp__gte = date1, timestamp__lte = date2)
 
             response = serializers.serialize("json", passes)
 
@@ -73,3 +51,30 @@ def PassesPerStation(request, station_id, date_from, date_to):
 
             response = (get_info.items(), pass_list)
             return HttpResponse(response, content_type='application/json')
+
+#Endpoint 2
+def passes_analysis(request, op1_ID, op2_ID, date_from, date_to):
+    date1 = datetime.strptime(date_from, "%Y%m%d")
+    date2 = datetime.strptime(date_to, "%Y%m%d")
+    passes = Passes.objects.filter(stationRef = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
+    response = serializers.serialize("json", passes)
+
+    List = []
+    i = 0
+    for obj in passes:
+        i = i + 1
+
+        List.append(({"PassIndex":i, "PassId":obj.passID, "StationID":obj.providerAbbr, "timestamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), "VevicleID":obj.vehicleRef, "Charge":str(obj.charge)}))
+    print(List)
+    get_info = {
+        "op1_ID" : op1_ID,
+        "op2_ID" : op2_ID,#Station.objects.get(stationID = station_id).stationProvider,
+        "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+        "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+        "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+        "NumberOfPasses" : len(passes),
+         "PassesList" : List
+        }
+
+    response = json.dumps(get_info)
+    return HttpResponse(response, content_type='application/json')

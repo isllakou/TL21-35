@@ -14,7 +14,7 @@ class OperatorAdmin(admin.ModelAdmin):
     list_display = ('provider_ID', 'tagProvider')
 
 class PassesAdmin(admin.ModelAdmin):
-    list_display = ( 'passID', 'timestamp', 'stationRef', 'vehicleRef', 'charge')
+    list_display = ( 'passID', 'timestamp', 'stationRef', 'vehicleRef', 'charge', 'providerAbbr')
 
 
 # class InvoiceAdmin(admin.ModelAdmin):
