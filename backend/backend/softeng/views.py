@@ -21,8 +21,7 @@ def get_timestamp(timestamp):
 
 def resetvehicles(request):
     if request.method == 'POST':
-        #Change path
-        df=pd.read_csv('sampledata01/sampledata01_vehicles_100.csv',sep=',')
+        df=pd.read_csv('sampledata01/sampledata01_vehicles_100.csv',sep=';')
         #print(df)
         Vehicle.objects.all().delete()
         row_iter = df.iterrows()
@@ -93,14 +92,14 @@ def resetstations(request):
 
 def resetpasses(request):
     if request.method == 'POST':
-        df=pd.read_csv('sampledata01/sampledata01_passes100_8000.csv',sep=',')
+        df=pd.read_csv('sampledata01/sampledata01_passes100_8000.csv',sep=';')
         Passes.objects.all().delete()
         row_iter = df.iterrows()
         objs = [
             Passes(
                  passID = row['passID'],
                  timestamp = get_timestamp(row['timestamp']),
-                 # stationRef = (Station.objects.get_or_create( stationID = row['stationRef'])[0]),
+                 #stationRef = (Station.objects.get_or_create( stationID = row['stationRef'])[0]),
                  stationRef = Station.objects.get(stationID = row['stationRef']),
                  vehicleRef = row['vehicleRef'],
                  charge = row['charge'],

@@ -17,22 +17,14 @@ def PassesPerStation(request, station_id, date_from, date_to):
 
             passes = Passes.objects.filter(stationRef = station_id, timestamp__gte = date1, timestamp__lte = date2)
 
-            response = serializers.serialize("json", passes)
+            #response = serializers.serialize("json", passes)
 
-            #General Information
-            get_info = {
-                "Station" : station_id,
-                "StationOperator" : Station.objects.get(stationID = station_id).stationProvider,
-                "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-                "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-                "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-                "NumberOfPasses" : len(passes)
-                }
+
 
             #Pass List
             pass_list = []
             i = 0
-            pass_list.append(("PassIndex", "PassId", "PassTimeStamp" , "VevicleID" , "TagProvider", "PassType", "PassCharge"))
+            #pass_list.append(("PassIndex", "PassId", "PassTimeStamp" , "VevicleID" , "TagProvider", "PassType", "PassCharge"))
             for obj in passes:
                 i = i + 1
                 tag_provider = Vehicle.objects.get(vehicleID = obj.vehicleRef).providerAbbr
@@ -47,9 +39,21 @@ def PassesPerStation(request, station_id, date_from, date_to):
                 else:
                     pass_type = "visitor"
 
-                pass_list.append((i, obj.passID, obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), obj.vehicleRef, tag_provider, pass_type, obj.charge, str3))
+                pass_list.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp": obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"),"VehicleID": obj.vehicleRef, "TagProvider":tag_provider, "PassType":pass_type, "PassCharge":str(obj.charge)}))
+            
+            #General Information
+            get_info = {
+                "Station" : station_id,
+                "StationOperator" : Station.objects.get(stationID = station_id).stationProvider,
+                "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+                "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+                "NumberOfPasses" : len(passes),
+                "PassesList" : pass_list
+                }
 
-            response = (get_info.items(), pass_list)
+            #response = (get_info.items(), pass_list)
+            response = json.dumps(get_info)
             return HttpResponse(response, content_type='application/json')
 
 #Endpoint b
