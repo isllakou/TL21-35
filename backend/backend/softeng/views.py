@@ -97,11 +97,11 @@ def resetpasses(request):
         Passes.objects.all().delete()
         row_iter = df.iterrows()
         objs = [
-
             Passes(
                  passID = row['passID'],
                  timestamp = get_timestamp(row['timestamp']),
-                 stationRef = (Station.objects.get_or_create( stationID = row['stationRef'])[0]),
+                 # stationRef = (Station.objects.get_or_create( stationID = row['stationRef'])[0]),
+                 stationRef = Station.objects.get(stationID = row['stationRef']),
                  vehicleRef = row['vehicleRef'],
                  charge = row['charge'],
                  providerAbbr = row['providerAbbr']

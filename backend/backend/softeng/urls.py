@@ -13,8 +13,9 @@ urlpatterns = [
     path('admin/resetpasses/', views.resetpasses),
     #this works!
     path('PassesPerStation/<str:station_id>/<str:date_from>/<str:date_to>', char_endpoints_views.PassesPerStation),
-    path('PassesAnalysis/<str:op1_ID>/<str:op2_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_analysis)
-
+    path('PassesAnalysis/<str:op1_ID>/<str:op2_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_analysis),
+    path('PassesCost/<str:op1_ID>/<str:op2_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_cost),
+    path('ChargesBy/<str:op_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.charges_by)
     #4 characteristic endpoints
     #change this is wrong!
     # path('admin/PassesPerStation/:stationID/:date_from/:date_to/', views.PassesPerStation(stationID, date_from, date_to)),
