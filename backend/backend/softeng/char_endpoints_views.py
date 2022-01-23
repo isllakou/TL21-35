@@ -1,63 +1,87 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.http import JsonResponse
-from django import forms
-from django.core import serializers
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.utils import timezone
+from datetime import datetime
 import json
+import csv
 import pandas as pd
 from .models import *
-from datetime import datetime
-from django.forms.models import model_to_dict
+
+#Function to calculate costs between two operators
+def calculate_cost_betweentwo_operators(op1_ID, op2_ID, date_from, date_to):
+    passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date_from, timestamp__lte = date_to, providerAbbr = op2_ID)
+    cost1 = 0
+    for obj in passes:
+        cost1 += obj.charge
+
+    passes = Passes.objects.filter(stationRef__stationID__startswith = op2_ID, timestamp__gte = date_from, timestamp__lte = date_to, providerAbbr = op1_ID)
+    cost2 = 0
+    for obj in passes:
+        cost2 += obj.charge
+
+    cost = cost1 - cost2
+    if cost < 0:
+        cost = 0
+
+    return cost
+
 
 #Endpoint a
-def PassesPerStation(request, station_id, date_from, date_to):
-            #Get Passes by id and date_from, date_to
-            date1 = datetime.strptime(date_from, "%Y%m%d")
-            date2 = datetime.strptime(date_to, "%Y%m%d")
+def passes_per_station(request, station_id, date_from, date_to):
+#Get Passes by id and date_from, date_to
+    format = request.GET.get('format')
+    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
 
-            passes = Passes.objects.filter(stationRef = station_id, timestamp__gte = date1, timestamp__lte = date2)
+    passes = Passes.objects.filter(stationRef = station_id, timestamp__gte = date1, timestamp__lte = date2)
 
-            response = serializers.serialize("json", passes)
+    List = []
+    i = 0
+    for obj in passes:
+        i = i + 1
 
-            #General Information
-            get_info = {
-                "Station" : station_id,
-                "StationOperator" : Station.objects.get(stationID = station_id).stationProvider,
-                "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-                "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-                "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-                "NumberOfPasses" : len(passes)
-                }
+        provider = obj.stationRef.stationProvider
+        abbr = Operator.objects.get(tagProvider = provider).provider_ID
 
-            #Pass List
-            pass_list = []
-            i = 0
-            pass_list.append(("PassIndex", "PassId", "PassTimeStamp" , "VevicleID" , "TagProvider", "PassType", "PassCharge"))
-            for obj in passes:
-                i = i + 1
-                tag_provider = Vehicle.objects.get(vehicleID = obj.vehicleRef).providerAbbr
+        if(obj.providerAbbr == abbr):
+            pass_type = "home"
+        else:
+            pass_type = "visitor"
 
-                #station_ref = obj.stationRef[:2]
-                station_ref = obj.stationRef
-                str2 = str(station_ref)
-                str3= str2[16:18]
+        List.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S") ,"VevicleID":obj.vehicleRef, "TagProvider":obj.providerAbbr, "PassType":pass_type}))
 
-                if(tag_provider==str3):
-                    pass_type = "home"
-                else:
-                    pass_type = "visitor"
+    if format == 'csv':
+        response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="PassesPerStation.csv"'},
+        )
 
-                pass_list.append((i, obj.passID, obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), obj.vehicleRef, tag_provider, pass_type, obj.charge, str3))
+        writer = csv.writer(response)
+        writer.writerow(['PassIndex', 'PassId', 'PassTimeStamp', 'VevicleID', 'TagProvider', 'PassType'])
+        for i in List:
+            writer.writerow([i['PassIndex'], i['PassId'], i['PassTimeStamp'], i['VevicleID'], i['TagProvider'], i['PassType']])
 
-            response = (get_info.items(), pass_list)
-            return HttpResponse(response, content_type='application/json')
+        return response
+
+    elif format == 'json' or 'None':
+        get_info = {
+            "Station" : station_id,
+            "StationOperator" : Station.objects.get(stationID = station_id).stationProvider,
+            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+            "NumberOfPasses" : len(passes),
+            "PassesList": List
+            }
+
+        response = json.dumps(get_info)
+        return HttpResponse(response, content_type='application/json')
+
 
 #Endpoint b
 def passes_analysis(request, op1_ID, op2_ID, date_from, date_to):
-    # print("rwquest is")
-    # print(request)
-    date1 = datetime.strptime(date_from, "%Y%m%d")
-    date2 = datetime.strptime(date_to, "%Y%m%d")
+    format = request.GET.get('format')
+    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
     passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
 
     List = []
@@ -65,53 +89,77 @@ def passes_analysis(request, op1_ID, op2_ID, date_from, date_to):
     for obj in passes:
         i = i + 1
 
-        List.append(({"PassIndex":i, "PassId":obj.passID, "StationID":obj.providerAbbr, "timestamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), "VevicleID":obj.vehicleRef, "Charge":str(obj.charge)}))
+        List.append(({"PassIndex":i, "PassId":obj.passID, "StationID":obj.stationRef.stationID, "Timestamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), "VevicleID":obj.vehicleRef, "Charge":str(obj.charge)}))
 
-    get_info = {
-        "op1_ID" : op1_ID,
-        "op2_ID" : op2_ID,#Station.objects.get(stationID = station_id).stationProvider,
-        "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-        "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-        "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-        "NumberOfPasses" : len(passes),
-         "PassesList" : List
-        }
+    if format == 'csv':
+        response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="PassesAnalysis.csv"'},
+        )
 
-    response = json.dumps(get_info)
-    return HttpResponse(response, content_type='application/json')
+        writer = csv.writer(response)
+        writer.writerow(['PassIndex', 'PassId', 'StationID', 'Timestamp', 'VevicleID', 'Charge'])
+        for i in List:
+            writer.writerow([i['PassIndex'], i['PassId'], i['StationID'], i['Timestamp'], i['VevicleID'], i['Charge']])
 
+        return response
 
+    elif format == 'json' or 'None':
+        get_info = {
+            "op1_ID" : op1_ID,
+            "op2_ID" : op2_ID,
+            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+            "NumberOfPasses" : len(passes),
+             "PassesList" : List
+            }
+
+        response = json.dumps(get_info)
+        return HttpResponse(response, content_type='application/json')
 
 
 #Endpoint c
 def passes_cost(request, op1_ID, op2_ID, date_from, date_to):
-    date1 = datetime.strptime(date_from, "%Y%m%d")
-    date2 = datetime.strptime(date_to, "%Y%m%d")
+    format = request.GET.get('format')
+    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
     passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
+    cost = calculate_cost_betweentwo_operators(op1_ID, op2_ID, date1, date2)
 
-    cost = 0
-    for obj in passes:
-        cost += obj.charge
+    if format == 'csv':
+        response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="PassesCost.csv"'},
+        )
 
-    get_info = {
-        "op1_ID" : op1_ID,
-        "op2_ID" : op2_ID,#Station.objects.get(stationID = station_id).stationProvider,
-        "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-        "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-        "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-        "NumberOfPasses" : len(passes),
-        "PassesCost" : str(cost)
-        }
+        writer = csv.writer(response)
+        writer.writerow(['NumberOfPasses', 'PassesCost'])
+        writer.writerow([len(passes), cost])
 
-    response = json.dumps(get_info)
-    return HttpResponse(response, content_type='application/json')
+        return response
+
+    elif format == 'json' or 'None':
+        get_info = {
+            "op1_ID" : op1_ID,
+            "op2_ID" : op2_ID,#Station.objects.get(stationID = station_id).stationProvider,
+            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+            "NumberOfPasses" : len(passes),
+            "PassesCost" : str(cost)
+            }
+
+        response = json.dumps(get_info)
+        return HttpResponse(response, content_type='application/json')
 
 
 
 #Endpoint 2d
 def charges_by(request, op_ID, date_from, date_to):
-    date1 = datetime.strptime(date_from, "%Y%m%d")
-    date2 = datetime.strptime(date_to, "%Y%m%d")
+    format = request.GET.get('format')
+    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
     providers = Operator.objects.values('provider_ID')
 
     List = []
@@ -123,20 +171,31 @@ def charges_by(request, op_ID, date_from, date_to):
             continue
 
         passes = Passes.objects.filter(stationRef__stationID__startswith = op_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = i['provider_ID'])
+        cost = calculate_cost_betweentwo_operators(op_ID, i['provider_ID'], date1, date2)
 
-        for obj in passes:
-            j = j + 1
-            cost += obj.charge
+        List.append(({"VisitingOperator":i['provider_ID'], "NumberOfPasses": len(passes), "PassesCost": str(cost)}))
 
-        List.append(({"VisitingOperator":i['provider_ID'], "NumberOfPasses": str(j), "PassesCost": str(cost)}))
+    if format == 'csv':
+        response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="PassesAnalysis.csv"'},
+        )
 
-    get_info = {
-        "op_ID" : op_ID,
-        "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-        "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-        "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-        "PPOList" : List
-        }
+        writer = csv.writer(response)
+        writer.writerow(['VisitingOperator', 'NumberOfPasses', 'PassesCost'])
+        for i in List:
+            writer.writerow([i['VisitingOperator'], i['NumberOfPasses'], i['PassesCost']])
 
-    response = json.dumps(get_info)
-    return HttpResponse(response, content_type='application/json')
+        return response
+
+    elif format == 'json' or 'None':
+        get_info = {
+            "op_ID" : op_ID,
+            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+            "PPOList" : List
+            }
+
+        response = json.dumps(get_info)
+        return HttpResponse(response, content_type='application/json')
