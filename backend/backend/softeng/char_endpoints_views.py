@@ -144,3 +144,20 @@ def charges_by(request, op_ID, date_from, date_to):
 
     response = json.dumps(get_info)
     return HttpResponse(response, content_type='application/json')
+
+#Useful Endpoints
+
+def getstations(request):
+    if request.method == 'GET':
+        stations = Station.objects
+        # print(stations)
+        # response = json.dumps(stations)
+        response = serializers.serialize('json', list(stations))
+        print(response)
+        # response = json.dumps(stations)
+        # return HttpResponse(response, content_type='application/json')
+        # return response
+        return HttpResponse(response, content_type='application/json')
+    else:
+        response = JsonResponse({"status":"failed"}, safe=False)
+        return response
