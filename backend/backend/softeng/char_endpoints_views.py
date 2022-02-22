@@ -24,6 +24,9 @@ def calculate_cost_betweentwo_operators(op1_ID, op2_ID, date_from, date_to):
 
     return cost
 
+# sort by PassTimestamp 
+def pass_timestamp(elem):
+    return elem["PassTimeStamp"]
 
 #Endpoint a
 def passes_per_station(request, station_id, date_from, date_to):
@@ -48,6 +51,8 @@ def passes_per_station(request, station_id, date_from, date_to):
             pass_type = "visitor"
 
         List.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S") ,"VevicleID":obj.vehicleRef, "TagProvider":obj.providerAbbr, "PassType":pass_type}))
+
+        List.sort(key=pass_timestamp)
 
     if format == 'csv':
         response = HttpResponse(
@@ -90,6 +95,8 @@ def passes_analysis(request, op1_ID, op2_ID, date_from, date_to):
         i = i + 1
 
         List.append(({"PassIndex":i, "PassId":obj.passID, "StationID":obj.stationRef.stationID, "Timestamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), "VevicleID":obj.vehicleRef, "Charge":str(obj.charge)}))
+
+    List.sort(key=pass_timestamp)
 
     if format == 'csv':
         response = HttpResponse(
