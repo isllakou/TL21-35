@@ -1,10 +1,13 @@
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
+from http import HTTPStatus
+
 from django.utils import timezone
 from datetime import datetime
 import json
 import csv
 import pandas as pd
 from .models import *
+
 
 #Function to calculate costs between two operators
 def calculate_cost_betweentwo_operators(op1_ID, op2_ID, date_from, date_to):
@@ -28,182 +31,228 @@ def calculate_cost_betweentwo_operators(op1_ID, op2_ID, date_from, date_to):
 def pass_timestamp(elem):
     return elem["PassTimeStamp"]
 
+# sort by PassTimestamp 
+def pass_timestamp2(elem):
+    return elem["Timestamp"]
+
+#is date in format YYYYMMDD
+def isdate(date):
+    if(len(date)==8):
+        if(0<int(date[4:6])<12 and 0<int(date[6:8])<31):
+            return True
+    return False
+
 #Endpoint a
 def passes_per_station(request, station_id, date_from, date_to):
-#Get Passes by id and date_from, date_to
-    format = request.GET.get('format')
-    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
-    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
+    if(type(station_id)==str and len(station_id)==4 and isdate(date_from) and isdate(date_to) and int(date_from)<int(date_to)):
+        #Get Passes by id and date_from, date_to
+        format = request.GET.get('format')
+        date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+        date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
 
-    passes = Passes.objects.filter(stationRef = station_id, timestamp__gte = date1, timestamp__lte = date2)
-
-    List = []
-    i = 0
-    for obj in passes:
-        i = i + 1
-
-        provider = obj.stationRef.stationProvider
-        abbr = Operator.objects.get(tagProvider = provider).provider_ID
-
-        if(obj.providerAbbr == abbr):
-            pass_type = "home"
+        passes = Passes.objects.filter(stationRef = station_id, timestamp__gte = date1, timestamp__lte = date2)
+        if not passes:
+            return HttpResponse(status=HTTPStatus.PAYMENT_REQUIRED)
         else:
-            pass_type = "visitor"
+            List = []
+            i = 0
+            for obj in passes:
+                i = i + 1
 
-        List.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S") ,"VevicleID":obj.vehicleRef, "TagProvider":obj.providerAbbr, "PassType":pass_type}))
+                provider = obj.stationRef.stationProvider
+                abbr = Operator.objects.get(tagProvider = provider).provider_ID
 
-        List.sort(key=pass_timestamp)
+                if(obj.providerAbbr == abbr):
+                    pass_type = "home"
+                else:
+                    pass_type = "visitor"
 
-    if format == 'csv':
-        response = HttpResponse(
-        content_type='text/csv',
-        headers={'Content-Disposition': 'attachment; filename="PassesPerStation.csv"'},
-        )
+                List.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S") ,"VevicleID":obj.vehicleRef, "TagProvider":obj.providerAbbr, "PassType":pass_type}))
+            
+                List.sort(key=pass_timestamp)
 
-        writer = csv.writer(response)
-        writer.writerow(['PassIndex', 'PassId', 'PassTimeStamp', 'VevicleID', 'TagProvider', 'PassType'])
-        for i in List:
-            writer.writerow([i['PassIndex'], i['PassId'], i['PassTimeStamp'], i['VevicleID'], i['TagProvider'], i['PassType']])
+                if format == 'csv':
+                    response = HttpResponse(
+                    content_type='text/csv',
+                    headers={'Content-Disposition': 'attachment; filename="PassesPerStation.csv"'},
+                    )
 
-        return response
+                    writer = csv.writer(response)
+                    writer.writerow(['PassIndex', 'PassId', 'PassTimeStamp', 'VevicleID', 'TagProvider', 'PassType'])
+                    for i in List:
+                        writer.writerow([i['PassIndex'], i['PassId'], i['PassTimeStamp'], i['VevicleID'], i['TagProvider'], i['PassType']])
 
-    elif format == 'json' or 'None':
-        get_info = {
-            "Station" : station_id,
-            "StationOperator" : Station.objects.get(stationID = station_id).stationProvider,
-            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-            "NumberOfPasses" : len(passes),
-            "PassesList": List
-            }
+                    return response
 
-        response = json.dumps(get_info)
-        return HttpResponse(response, content_type='application/json')
+                elif format == 'json' or 'None':
+                    get_info = {
+                        "Station" : station_id,
+                        "StationOperator" : Station.objects.get(stationID = station_id).stationProvider,
+                        "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                        "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+                        "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+                        "NumberOfPasses" : len(passes),
+                        "PassesList": List
+                        }
+
+                    response = json.dumps(get_info)
+                    
+                    return HttpResponse(response, status=HTTPStatus.OK,content_type='application/json')
+    elif(type(station_id)!=str or len(station_id)!=4 or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
+        return HttpResponse(status=HTTPStatus.BAD_REQUEST)
+    
+    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 #Endpoint b
 def passes_analysis(request, op1_ID, op2_ID, date_from, date_to):
-    format = request.GET.get('format')
-    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
-    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
-    passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
+    if(type(op1_ID)==str and type(op2_ID)==str and len(op1_ID)==2 and len(op2_ID)==2 and isdate(date_from) and isdate(date_to) and int(date_from)<int(date_to)):
+        format = request.GET.get('format')
+        date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+        date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
+        passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
+        if not passes:
+            return HttpResponse(status=HTTPStatus.PAYMENT_REQUIRED)
+        else:
+            List = []
+            i = 0
+            for obj in passes:
+                i = i + 1
 
-    List = []
-    i = 0
-    for obj in passes:
-        i = i + 1
+                List.append(({"PassIndex":i, "PassId":obj.passID, "StationID":obj.stationRef.stationID, "Timestamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), "VevicleID":obj.vehicleRef, "Charge":str(obj.charge)}))
 
-        List.append(({"PassIndex":i, "PassId":obj.passID, "StationID":obj.stationRef.stationID, "Timestamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S"), "VevicleID":obj.vehicleRef, "Charge":str(obj.charge)}))
+            List.sort(key=pass_timestamp2)
 
-    List.sort(key=pass_timestamp)
+            if format == 'csv':
+                response = HttpResponse(
+                content_type='text/csv',
+                headers={'Content-Disposition': 'attachment; filename="PassesAnalysis.csv"'},
+                )
 
-    if format == 'csv':
-        response = HttpResponse(
-        content_type='text/csv',
-        headers={'Content-Disposition': 'attachment; filename="PassesAnalysis.csv"'},
-        )
+                writer = csv.writer(response)
+                writer.writerow(['PassIndex', 'PassId', 'StationID', 'Timestamp', 'VevicleID', 'Charge'])
+                for i in List:
+                    writer.writerow([i['PassIndex'], i['PassId'], i['StationID'], i['Timestamp'], i['VevicleID'], i['Charge']])
 
-        writer = csv.writer(response)
-        writer.writerow(['PassIndex', 'PassId', 'StationID', 'Timestamp', 'VevicleID', 'Charge'])
-        for i in List:
-            writer.writerow([i['PassIndex'], i['PassId'], i['StationID'], i['Timestamp'], i['VevicleID'], i['Charge']])
+                return response
 
-        return response
+            elif format == 'json' or 'None':
+                get_info = {
+                    "op1_ID" : op1_ID,
+                    "op2_ID" : op2_ID,
+                    "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                    "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+                    "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+                    "NumberOfPasses" : len(passes),
+                    "PassesList" : List
+                    }
 
-    elif format == 'json' or 'None':
-        get_info = {
-            "op1_ID" : op1_ID,
-            "op2_ID" : op2_ID,
-            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-            "NumberOfPasses" : len(passes),
-             "PassesList" : List
-            }
+                response = json.dumps(get_info)
+                return HttpResponse(response, content_type='application/json')
 
-        response = json.dumps(get_info)
-        return HttpResponse(response, content_type='application/json')
+    elif(type(op1_ID)!=str or type(op2_ID)!=str or len(op1_ID)!=2 or len(op2_ID)!=2 or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
+        return HttpResponse(status=HTTPStatus.BAD_REQUEST)
+    
+    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 #Endpoint c
 def passes_cost(request, op1_ID, op2_ID, date_from, date_to):
-    format = request.GET.get('format')
-    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
-    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
-    passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
-    cost = calculate_cost_betweentwo_operators(op1_ID, op2_ID, date1, date2)
+    if(type(op1_ID)==str and type(op2_ID)==str and len(op1_ID)==2 and len(op2_ID)==2 and isdate(date_from) and isdate(date_to) and int(date_from)<int(date_to)):
+        format = request.GET.get('format')
+        date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+        date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
+        passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
+        
+        if not passes:
+            return HttpResponse(status=HTTPStatus.PAYMENT_REQUIRED)
+        else:
+            cost = calculate_cost_betweentwo_operators(op1_ID, op2_ID, date1, date2)
 
-    if format == 'csv':
-        response = HttpResponse(
-        content_type='text/csv',
-        headers={'Content-Disposition': 'attachment; filename="PassesCost.csv"'},
-        )
+            if format == 'csv':
+                response = HttpResponse(
+                content_type='text/csv',
+                headers={'Content-Disposition': 'attachment; filename="PassesCost.csv"'},
+                )
 
-        writer = csv.writer(response)
-        writer.writerow(['NumberOfPasses', 'PassesCost'])
-        writer.writerow([len(passes), cost])
+                writer = csv.writer(response)
+                writer.writerow(['NumberOfPasses', 'PassesCost'])
+                writer.writerow([len(passes), cost])
 
-        return response
+                return response
 
-    elif format == 'json' or 'None':
-        get_info = {
-            "op1_ID" : op1_ID,
-            "op2_ID" : op2_ID,#Station.objects.get(stationID = station_id).stationProvider,
-            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-            "NumberOfPasses" : len(passes),
-            "PassesCost" : str(cost)
-            }
+            elif format == 'json' or 'None':
+                get_info = {
+                    "op1_ID" : op1_ID,
+                    "op2_ID" : op2_ID,#Station.objects.get(stationID = station_id).stationProvider,
+                    "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                    "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+                    "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+                    "NumberOfPasses" : len(passes),
+                    "PassesCost" : str(cost)
+                    }
 
-        response = json.dumps(get_info)
-        return HttpResponse(response, content_type='application/json')
+                response = json.dumps(get_info)
+                return HttpResponse(response, content_type='application/json')
+    elif(type(op1_ID)!=str or len(op1_ID)!=2 or type(op2_ID)!=str or len(op2_ID)!=2  or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
+        return HttpResponse(status=HTTPStatus.BAD_REQUEST)
+    
+    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
+
+
 
 
 
 #Endpoint 2d
 def charges_by(request, op_ID, date_from, date_to):
-    format = request.GET.get('format')
-    date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
-    date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
-    providers = Operator.objects.values('provider_ID')
+    if(type(op_ID)==str and len(op_ID)==2 and isdate(date_from) and isdate(date_to) and int(date_from)<int(date_to)):
+        format = request.GET.get('format')
+        date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
+        date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
+        providers = Operator.objects.values('provider_ID')
+        if not providers:
+            return HttpResponse(status=HTTPStatus.PAYMENT_REQUIRED)
+        else:
+            List = []
+            for i in providers:
+                cost = 0
+                j = 0
 
-    List = []
-    for i in providers:
-        cost = 0
-        j = 0
+                if str(i['provider_ID']) == str(op_ID):
+                    continue
 
-        if str(i['provider_ID']) == str(op_ID):
-            continue
+                passes = Passes.objects.filter(stationRef__stationID__startswith = op_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = i['provider_ID'])
+                cost = calculate_cost_betweentwo_operators(op_ID, i['provider_ID'], date1, date2)
 
-        passes = Passes.objects.filter(stationRef__stationID__startswith = op_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = i['provider_ID'])
-        cost = calculate_cost_betweentwo_operators(op_ID, i['provider_ID'], date1, date2)
+                List.append(({"VisitingOperator":i['provider_ID'], "NumberOfPasses": len(passes), "PassesCost": str(cost)}))
 
-        List.append(({"VisitingOperator":i['provider_ID'], "NumberOfPasses": len(passes), "PassesCost": str(cost)}))
+            if format == 'csv':
+                response = HttpResponse(
+                content_type='text/csv',
+                headers={'Content-Disposition': 'attachment; filename="PassesAnalysis.csv"'},
+                )
 
-    if format == 'csv':
-        response = HttpResponse(
-        content_type='text/csv',
-        headers={'Content-Disposition': 'attachment; filename="PassesAnalysis.csv"'},
-        )
+                writer = csv.writer(response)
+                writer.writerow(['VisitingOperator', 'NumberOfPasses', 'PassesCost'])
+                for i in List:
+                    writer.writerow([i['VisitingOperator'], i['NumberOfPasses'], i['PassesCost']])
 
-        writer = csv.writer(response)
-        writer.writerow(['VisitingOperator', 'NumberOfPasses', 'PassesCost'])
-        for i in List:
-            writer.writerow([i['VisitingOperator'], i['NumberOfPasses'], i['PassesCost']])
+                return response
 
-        return response
+            elif format == 'json' or 'None':
+                get_info = {
+                    "op_ID" : op_ID,
+                    "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
+                    "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
+                    "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
+                    "PPOList" : List
+                    }
 
-    elif format == 'json' or 'None':
-        get_info = {
-            "op_ID" : op_ID,
-            "RequestTimestamp" : datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodFrom" :date1.strftime("%Y/%m/%d %H:%M:%S"),
-            "PeriodTo" :date2.strftime("%Y/%m/%d %H:%M:%S"),
-            "PPOList" : List
-            }
-
-        response = json.dumps(get_info)
-        return HttpResponse(response, content_type='application/json')
+                response = json.dumps(get_info)
+                return HttpResponse(response, content_type='application/json')
+        
+    elif(type(op_ID)!=str or len(op_ID)!=2 or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
+        return HttpResponse(status=HTTPStatus.BAD_REQUEST)
+    
+    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
