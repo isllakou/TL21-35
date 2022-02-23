@@ -47,7 +47,7 @@ def passes_per_station(request, station_id, date_from, date_to):
         else:
             pass_type = "visitor"
 
-        List.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S") ,"VevicleID":obj.vehicleRef, "TagProvider":obj.providerAbbr, "PassType":pass_type}))
+        List.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S") ,"VevicleID":obj.vehicleRef, "TagProvider":obj.providerAbbr, "PassType":pass_type, "PassCharge":str(obj.charge)}))
 
     if format == 'csv':
         response = HttpResponse(
@@ -56,9 +56,9 @@ def passes_per_station(request, station_id, date_from, date_to):
         )
 
         writer = csv.writer(response)
-        writer.writerow(['PassIndex', 'PassId', 'PassTimeStamp', 'VevicleID', 'TagProvider', 'PassType'])
+        writer.writerow(['PassIndex', 'PassId', 'PassTimeStamp', 'VevicleID', 'TagProvider', 'PassType', 'PassCharge'])
         for i in List:
-            writer.writerow([i['PassIndex'], i['PassId'], i['PassTimeStamp'], i['VevicleID'], i['TagProvider'], i['PassType']])
+            writer.writerow([i['PassIndex'], i['PassId'], i['PassTimeStamp'], i['VevicleID'], i['TagProvider'], i['PassType'], i['PassCharge']])
 
         return response
 
