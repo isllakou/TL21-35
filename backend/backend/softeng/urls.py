@@ -11,6 +11,7 @@ urlpatterns = [
     path('admin/resetvehicles/', views.resetvehicles),
     path('admin/resetpasses/', views.resetpasses),
 
+
     path('PassesPerStation/<str:station_id>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_per_station),
     path('PassesAnalysis/<str:op1_ID>/<str:op2_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_analysis),
     path('PassesCost/<str:op1_ID>/<str:op2_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_cost),

@@ -1,0 +1,41 @@
+.new-form {
+    margin-top: 20px;
+  }
+
+  
+  .submit-btn {
+    width: 100%;
+  }
+  
+  .shorten-title {
+    margin-top: 20px;
+  }
+  
+  .error{
+    margin-top: 20px;
+    color: red;
+  }
+
+
+  .data_id{
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 80%;
+  }
+  
+  #data_id td, #data_id th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  #data_id tr:nth-child(even){background-color: #f2f2f2;}
+  
+  #data_id tr:hover {background-color: #ddd;}
+  
+  #data_id th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #3488f5;
+    color: white;
+  } 
