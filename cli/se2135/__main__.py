@@ -9,13 +9,6 @@ def main():
     '''
     pass
 
-#
-# @click.group(name='post')
-# def admin_group():
-#     '''
-#     Group for admin Endpoints
-#     '''
-#     pass
 
 @click.command(name='resetstations')
 def reset_stations():
@@ -37,13 +30,7 @@ def reset_vehicles():
     result_dict = result.json()
     click.echo(result_dict)
 
-#
-# @click.group(name='get')
-# def basic_group():
-#     '''
-#     Group for basic endpoints
-#     '''
-#     pass
+
 
 @click.command(name='passesperstation')
 @click.option('--station_id', help="Συμπληρώστε το id του σταθμού!", type=str, required=True)
@@ -116,7 +103,6 @@ def charges_by(op_id, date_from, date_to, format):
 @click.command(name='admin')
 @click.option('--passesupd', help="Πρόσθεση νέων Passes από αρχείο CSV", type=str, required=True)
 @click.argument('source', type=click.File('r'))
-# @click.option('--source', help="Aρχείο CSV", type=str, required=True)
 def admin():
     df=pd.read_csv(source, sep=';')
     row_iter = df.iterrows()
@@ -155,6 +141,3 @@ main.add_command(passes_analysis)
 main.add_command(passes_cost)
 main.add_command(charges_by)
 main.add_command(admin)
-
-# main.add_command(admin_group)
-# main.add_command(basic_group)
