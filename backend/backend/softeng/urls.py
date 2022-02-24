@@ -10,6 +10,7 @@ urlpatterns = [
     path('admin/resetstations/', views.resetstations),
     path('admin/resetvehicles/', views.resetvehicles),
     path('admin/resetpasses/', views.resetpasses),
+    path('admin/healthcheck/', views.healthcheck),
 
 
     path('PassesPerStation/<str:station_id>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_per_station),
