@@ -13,10 +13,10 @@ class PassesCost extends React.Component{
       date_from: "",
       date_to: "",
       content: {},
+      clear: true,
       // bohthitika
       successful: null,
-      message: null,
-      url: null
+      message: null
     };
 
     this.handleop1 = this.handleop1.bind(this);
@@ -24,6 +24,7 @@ class PassesCost extends React.Component{
     this.handledateto = this.handledateto.bind(this);
     this.handledatefrom = this.handledatefrom.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleClear = this.handleClear.bind(this);
    }
 
     handleop1(e){
@@ -50,12 +51,17 @@ class PassesCost extends React.Component{
       this.setState({ [name]: value});
     }
 
+    handleClear(e){
+      this.setState({clear: true});
+    }
+
 
   handleSubmit(e) {
     this.setState({ successful: null });
 
+    this.setState({clear:false});
+
     if (this.state.op1 && this.state.op2 && this.state.datefrom && this.state.dateto) {
-      // this.setState({ successful: 'smth' });
       let reqObj = {
         op1: this.state.op1,
         op2: this.state.op2,
@@ -70,7 +76,7 @@ class PassesCost extends React.Component{
         response => {
           this.setState({
             content: response.data,
-            successful: 'y'
+            successful: 'yes'
           });
         },
         error => {
@@ -81,10 +87,12 @@ class PassesCost extends React.Component{
             error.message ||
             error.toString();
 
-          if (resMessage == "Request failed with status code 402") resMessage = "There are no available sessions";
-          if (resMessage == "Anauthorized") resMessage = "Please retry with a valid ID";
+            if (resMessage == "Request failed with status code 400") resMessage = "Request failed with status code 400-Bad Request"
+            if (resMessage == "Request failed with status code 402") resMessage = "Request failed with status code 402-No Data";
+            if (resMessage == "Request failed with status code 500") resMessage = "Request failed with status code 500-Interval Server Error";
+
           this.setState({
-            successful: 'n',
+            successful: 'no',
             content: [],
             message: resMessage
           });
@@ -93,7 +101,8 @@ class PassesCost extends React.Component{
     }
     else{
       this.setState({
-      successful: 'x'
+      successful: 'no',
+      message: "Request failed with status code 400-Bad Request"
       })
     }
   }
@@ -144,7 +153,6 @@ render() {
       <div className="new-form">
           <h1> Passes Cost</h1>
           
-          {/* NE*/}
           <input name="op1"
              field="op1"
              placeholder="op1"
@@ -160,7 +168,7 @@ render() {
              onChange={this.handleop2}
 
               />
-          {/* 20000102 */}
+          
           <input name="datefrom"
             type="datefrom"
             field="datefrom"
@@ -168,7 +176,7 @@ render() {
             value={this.state.datefrom}
             onChange={this.handledatefrom}
             />
-          {/* 20190102 */}
+        
           <input name="dateto"
             type="dateto"
             field="dateto"
@@ -186,39 +194,29 @@ render() {
              </button>
 
 
-          {this.state.successful == 'n' && (
+          {this.state.successful == 'no' && (
             <div className="error">
-              {this.state.successful}
               {this.state.message}
-              {this.state.url}
             </div>
             )} 
             
-            {this.state.successful == 'x' && (
-            <div className="error">
-              {this.state.successful}
-            </div>
-            )}
 
-            {this.state.successful =='y' && (
-              <div className="form-group">
-                <div id="response"
-                  className={
-                    this.state.successful
-                      ? "alert alert-success"
-                      : "alert alert-danger"
-                  }
-                  role="alert"
-                >
-                  <div className="welcome">
-                   
-                  </div>
+
+            {this.state.successful =='yes' && this.state.clear == false &&(
+                <div id="response">
                   <header className="jumbotron" id="getData">
                   <h2> Passes Cost: </h2>
                     {this.minitable()}
+
+                    <button className="clear-button"
+                      name="action"
+                      onClick={this.handleClear}
+                      >
+                      Clear
+                    </button>
+                    
                   </header>
                   </div>
-                </div>
             )}   
       </div>
 

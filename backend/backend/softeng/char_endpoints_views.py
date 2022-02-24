@@ -38,7 +38,7 @@ def pass_timestamp2(elem):
 #is date in format YYYYMMDD
 def isdate(date):
     if(len(date)==8):
-        if(0<int(date[4:6])<12 and 0<int(date[6:8])<31):
+        if(0<int(date[4:6])<13 and 0<int(date[6:8])<32):
             return True
     return False
 
