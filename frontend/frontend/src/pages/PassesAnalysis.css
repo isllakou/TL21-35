@@ -7,6 +7,14 @@
     width: 100%;
   }
   
+  .clear-button{
+    width: 20;
+    margin-left: auto;
+    -webkit-margin-bottom-collapse: 20px;
+    color: red;
+    padding-bottom: 12px;
+  }
+  
   .shorten-title {
     margin-top: 20px;
   }

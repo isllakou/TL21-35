@@ -1,3 +1,4 @@
+from urllib import response
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core import serializers
@@ -6,6 +7,7 @@ import json
 import pandas as pd
 from .models import *
 from datetime import datetime
+import django
 
 def get_timestamp(timestamp):
     date_time = timestamp.split(" ")
@@ -124,4 +126,11 @@ def resetpasses(request):
         return response
 
 def healthcheck(request):
-    return HttpResponse("hi")
+    # db_name = dj.db.connection.settings_dict['NAME']
+    if request.method == 'GET':
+        if django.db.connection.ensure_connection() is not 'None':
+            response = JsonResponse({"status":"OK","dbconnection":"[connection string]"}, safe=False)
+        else: 
+            response = JsonResponse({"status":"failed","dbconnection":"[connection string]"}, safe=False)
+        return response 
+
