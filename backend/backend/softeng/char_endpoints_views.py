@@ -27,18 +27,18 @@ def calculate_cost_betweentwo_operators(op1_ID, op2_ID, date_from, date_to):
 
     return cost
 
-# sort by PassTimestamp 
+# sort by PassTimestamp
 def pass_timestamp(elem):
     return elem["PassTimeStamp"]
 
-# sort by PassTimestamp 
+# sort by PassTimestamp
 def pass_timestamp2(elem):
     return elem["Timestamp"]
 
 #is date in format YYYYMMDD
 def isdate(date):
     if(len(date)==8):
-        if(0<int(date[4:6])<12 and 0<int(date[6:8])<31):
+        if(0<int(date[4:6])<13 and 0<int(date[6:8])<32):
             return True
     return False
 
@@ -68,7 +68,7 @@ def passes_per_station(request, station_id, date_from, date_to):
                     pass_type = "visitor"
 
                 List.append(({"PassIndex":i, "PassId":obj.passID, "PassTimeStamp":obj.timestamp.strftime("%Y/%m/%d %H:%M:%S") ,"VevicleID":obj.vehicleRef, "TagProvider":obj.providerAbbr, "PassType":pass_type, "PassCharge":str(obj.charge)}))
-            
+
                 List.sort(key=pass_timestamp)
 
                 if format == 'csv':
@@ -96,11 +96,11 @@ def passes_per_station(request, station_id, date_from, date_to):
                         }
 
                     response = json.dumps(get_info)
-                    
+
                     return HttpResponse(response, status=HTTPStatus.OK,content_type='application/json')
     elif(type(station_id)!=str or len(station_id)!=4 or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
         return HttpResponse(status=HTTPStatus.BAD_REQUEST)
-    
+
     return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
@@ -152,7 +152,7 @@ def passes_analysis(request, op1_ID, op2_ID, date_from, date_to):
 
     elif(type(op1_ID)!=str or type(op2_ID)!=str or len(op1_ID)!=2 or len(op2_ID)!=2 or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
         return HttpResponse(status=HTTPStatus.BAD_REQUEST)
-    
+
     return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
@@ -163,7 +163,7 @@ def passes_cost(request, op1_ID, op2_ID, date_from, date_to):
         date1 = datetime.strptime(date_from, "%Y%m%d").replace(tzinfo=timezone.utc)
         date2 = datetime.strptime(date_to, "%Y%m%d").replace(tzinfo=timezone.utc)
         passes = Passes.objects.filter(stationRef__stationID__startswith = op1_ID, timestamp__gte = date1, timestamp__lte = date2, providerAbbr = op2_ID)
-        
+
         if not passes:
             return HttpResponse(status=HTTPStatus.PAYMENT_REQUIRED)
         else:
@@ -196,7 +196,7 @@ def passes_cost(request, op1_ID, op2_ID, date_from, date_to):
                 return HttpResponse(response, content_type='application/json')
     elif(type(op1_ID)!=str or len(op1_ID)!=2 or type(op2_ID)!=str or len(op2_ID)!=2  or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
         return HttpResponse(status=HTTPStatus.BAD_REQUEST)
-    
+
     return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
@@ -250,9 +250,8 @@ def charges_by(request, op_ID, date_from, date_to):
 
                 response = json.dumps(get_info)
                 return HttpResponse(response, content_type='application/json')
-        
+
     elif(type(op_ID)!=str or len(op_ID)!=2 or (not isdate(date_from)) or (not isdate(date_to)) or int(date_from)>int(date_to)):
         return HttpResponse(status=HTTPStatus.BAD_REQUEST)
-    
-    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
+    return HttpResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)

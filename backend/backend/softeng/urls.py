@@ -16,5 +16,5 @@ urlpatterns = [
     path('PassesAnalysis/<str:op1_ID>/<str:op2_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_analysis),
     path('PassesCost/<str:op1_ID>/<str:op2_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.passes_cost),
     path('ChargesBy/<str:op_ID>/<str:date_from>/<str:date_to>', char_endpoints_views.charges_by)
-    
+
 ]
