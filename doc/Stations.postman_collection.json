@@ -1,0 +1,413 @@
+{
+	"info": {
+		"_postman_id": "80aab9a1-6606-4c63-bd5b-2b95e01b3e91",
+		"name": "Stations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Reset Stations",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/admin/resetstations/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"admin",
+						"resetstations",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Healthcheck",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/admin/resetstations/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"admin",
+						"resetstations",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reset Passes",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/admin/resetpasses/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"admin",
+						"resetpasses",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reset Vehicles",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/admin/resetvehicles/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"admin",
+						"resetvehicles",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PassesPerStation(a)",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/PassesPerStation/AO10/20201001/20201031",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"PassesPerStation",
+						"AO10",
+						"20201001",
+						"20201031"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PassesPerStation(a)csv",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"username\": \"mitfos\",\n        \"password\": \"fdfff\",\n        \"name\": \"rfdffd\",\n        \"email\": \"fdffd\",\n        \"phone\": \"44\",\n        \"mobilephone\": \"44\",\n        \"adress\": \"ndsdsl\",\n        \"city\": \"ds\",\n        \"postalcode\": \"22\",\n        \"cardNo\": 2,\n        \"cvc\": 4,\n        \"walletuser\": 2,\n        \"walletpwd\": 4\n        \n            }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/PassesPerStation/AO10/20201001/20201031?format=csv",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"PassesPerStation",
+						"AO10",
+						"20201001",
+						"20201031"
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "csv"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PassesAnalysis(b)",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/PassesAnalysis/AO/GF/20200101/20201031",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"PassesAnalysis",
+						"AO",
+						"GF",
+						"20200101",
+						"20201031"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PassesAnalysis(b)csv",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/PassesAnalysis/NE/OO/20190105/20190107?format=csv",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"PassesAnalysis",
+						"NE",
+						"OO",
+						"20190105",
+						"20190107"
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "csv"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PassesCost(c)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/PassesCost/AO/MR/20181212/20190111",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"PassesCost",
+						"AO",
+						"MR",
+						"20181212",
+						"20190111"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PassesCost(c)csv",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/PassesCost/AO/MR/20181212/20190111?format=csv",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"PassesCost",
+						"AO",
+						"MR",
+						"20181212",
+						"20190111"
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "csv"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ChargesBy(2d)",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"tejst1\",\n    \"password\":\"test!@#132\",\n    \"name\":\"liakos\",\n    \"lastname\":\"ragkousis\",\n    \"email\":\"sadfsadf\",\n    \"phone\":\"2102139390\",\n    \"mobilephone\":\"6982942953\",\n    \"adress\":\"xynda 18\",\n    \"city\":\"athens\",\n    \"postalcode\":\"11141\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/ChargesBy/AO/20181212/20201001",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"ChargesBy",
+						"AO",
+						"20181212",
+						"20201001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ChargesBy(2d)csv",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"tejst1\",\n    \"password\":\"test!@#132\",\n    \"name\":\"liakos\",\n    \"lastname\":\"ragkousis\",\n    \"email\":\"sadfsadf\",\n    \"phone\":\"2102139390\",\n    \"mobilephone\":\"6982942953\",\n    \"adress\":\"xynda 18\",\n    \"city\":\"athens\",\n    \"postalcode\":\"11141\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9103/interoperability/api/ChargesBy/AO/20181212/20201001?format=csv",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9103",
+					"path": [
+						"interoperability",
+						"api",
+						"ChargesBy",
+						"AO",
+						"20181212",
+						"20201001"
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "csv"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
